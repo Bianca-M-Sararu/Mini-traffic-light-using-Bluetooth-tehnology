@@ -1,0 +1,329 @@
+#include "BluetoothSerial.h"
+BluetoothSerial ESP_BT;
+
+#define A 0
+#define B 18
+#define C 19
+#define D 22
+#define E 21
+#define F 5
+#define G 15
+#define DP 2
+#define DIGIT1 12
+#define DIGIT2 13
+
+int LED_Pin_Blue=23;
+int LED_Pin_Green=4;
+int LED_Pin_Yellow=16;
+int LED_Pin_Red=17;
+
+unsigned long current_time_GREEN;
+unsigned long current_time_YELLOW;
+unsigned long current_time_RED;
+
+ const unsigned long MAX_INPUT=10;
+
+
+bool green=false;
+bool red=false;
+bool yellow=false;
+
+bool verificare=true;
+
+char key[10];
+
+
+void setup(){
+  Serial.begin(115200);
+
+  ESP_BT.begin("ESP_Echipa_7");
+  Serial.println("Bluetooth Device is Ready to Pair");
+
+  pinMode(LED_Pin_Blue,OUTPUT);
+  pinMode(LED_Pin_Green,OUTPUT);
+  pinMode(LED_Pin_Yellow,OUTPUT);
+  pinMode(LED_Pin_Red,OUTPUT);
+
+  pinMode(A, OUTPUT); //A
+ pinMode(B, OUTPUT); //B
+ pinMode(C, OUTPUT); //C
+ pinMode(D, OUTPUT); //D
+ pinMode(E, OUTPUT); //E
+ pinMode(F, OUTPUT); //F
+ pinMode(G, OUTPUT); //G
+ pinMode(DP, OUTPUT); //DP
+ pinMode(DIGIT1, OUTPUT); //DIGIT1
+ pinMode(DIGIT2, OUTPUT); //DIGIT2
+}
+
+
+void process_data(const char * key){ 
+  Serial.println(key); 
+  if(!strcmp(key,"Verde")){ 
+     green=true;
+     red=false;
+     yellow=false;
+     current_time_GREEN=millis();
+  }else if(!strcmp(key,"Galben")){ 
+    green=false;
+     red=false;
+     yellow=true;
+     current_time_YELLOW=millis();
+  }else if(!strcmp(key,"Rosu")){
+    green=false;
+     red=true;
+     yellow=false;
+     current_time_RED=millis();
+  }
+} 
+
+void processIncomingByte (const byte inByte) { 
+
+  static char input_line [MAX_INPUT]; 
+  static unsigned int input_pos = 0;   
+
+   switch (inByte) { 
+    case '\n':  
+    input_line [input_pos] = 0;    
+    process_data (input_line);
+    input_pos = 0;  
+    break; 
+
+    case '\r':    
+    break;  
+    default:   
+
+    if (input_pos < (MAX_INPUT - 1)) 
+     input_line [input_pos++] = inByte; 
+     break;   
+ }    
+}  
+
+
+
+
+void loop(){
+if (ESP_BT.available()) {
+    processIncomingByte(ESP_BT.read());
+    }
+
+if(green==true && red==false && yellow==false && current_time_GREEN!=current_time_RED && current_time_GREEN!=current_time_YELLOW){
+  digitalWrite(LED_Pin_Green,HIGH);
+  digitalWrite(LED_Pin_Red,LOW);
+  digitalWrite(LED_Pin_Yellow,LOW);
+
+  digitalWrite(DIGIT1,LOW); //DIGIT1
+  digitalWrite(DIGIT2,HIGH); //DIGIT2
+  digitalWrite(A,HIGH); //a
+  digitalWrite(B,LOW); //b
+  digitalWrite(C,HIGH); //c
+  digitalWrite(D,HIGH); //d
+  digitalWrite(E,LOW); //e
+  digitalWrite(F,HIGH); //f
+  digitalWrite(G,HIGH); // g
+  digitalWrite(DP,LOW); // DP
+  delay(1000);
+
+  digitalWrite(DIGIT1,HIGH); //DIGIT1
+  digitalWrite(DIGIT2,LOW); //DIGIT2
+  digitalWrite(A,LOW); //a
+  digitalWrite(B,LOW); //b
+  digitalWrite(C,LOW); //c
+  digitalWrite(D,HIGH); //d
+  digitalWrite(E,HIGH); //e
+  digitalWrite(F,HIGH); //f
+  digitalWrite(G,HIGH); // g
+
+  while(verificare){
+    if(millis()-current_time_GREEN<=5000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(1000);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(1000);
+    }else if(millis()-current_time_GREEN>5000 && millis()-current_time_GREEN<=10000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(500);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(500);
+    }else if(millis()-current_time_GREEN>10000 && millis()-current_time_GREEN<=15000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(333);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(333);
+    }else{
+     verificare=false;
+     digitalWrite(LED_Pin_Green,LOW);
+     digitalWrite(LED_Pin_Blue,LOW);
+
+     digitalWrite(DIGIT1,LOW); //DIGIT1
+     digitalWrite(DIGIT2,HIGH); //DIGIT2
+     digitalWrite(A,LOW); //a
+     digitalWrite(B,LOW); //b
+     digitalWrite(C,LOW); //c
+     digitalWrite(D,LOW); //d
+     digitalWrite(E,LOW); //e
+     digitalWrite(F,LOW); //f
+     digitalWrite(G,LOW); // g
+     digitalWrite(DP,LOW); // DP
+
+     digitalWrite(DIGIT1,HIGH); //DIGIT1
+     digitalWrite(DIGIT2,LOW); //DIGIT2
+     digitalWrite(A,LOW); //a
+      digitalWrite(B,LOW); //b
+      digitalWrite(C,LOW); //c
+      digitalWrite(D,LOW); //d
+      digitalWrite(E,LOW); //e
+      digitalWrite(F,LOW); //f
+      digitalWrite(G,LOW); // g
+      green=false;
+    }
+  }
+}else if(yellow==true && red==false && green==false && current_time_YELLOW!=current_time_RED && current_time_YELLOW!=current_time_GREEN){
+  verificare=true;
+  digitalWrite(LED_Pin_Yellow,HIGH);
+  digitalWrite(LED_Pin_Red,LOW);
+  digitalWrite(LED_Pin_Green,LOW);
+
+  digitalWrite(DIGIT1,LOW); //DIGIT1
+  digitalWrite(DIGIT2,HIGH); //DIGIT2
+  digitalWrite(A,LOW); //a
+  digitalWrite(B,HIGH); //b
+  digitalWrite(C,HIGH); //c
+  digitalWrite(D,LOW); //d
+  digitalWrite(E,LOW); //e
+  digitalWrite(F,LOW); //f
+  digitalWrite(G,LOW); // g
+  digitalWrite(DP,LOW); // DP
+  delay(1000);
+
+  digitalWrite(DIGIT1,HIGH); //DIGIT1
+  digitalWrite(DIGIT2,LOW); //DIGIT2
+  digitalWrite(A,LOW); //a
+  digitalWrite(B,LOW); //b
+  digitalWrite(C,HIGH); //c
+  digitalWrite(D,LOW); //d
+  digitalWrite(E,HIGH); //e
+  digitalWrite(F,LOW); //f
+  digitalWrite(G,HIGH); // g
+
+
+  while(verificare){
+    if(millis()-current_time_YELLOW<=5000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(1000);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(1000);
+    }else if(millis()-current_time_YELLOW>5000 && millis()-current_time_YELLOW<=10000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(1000);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(1000);
+    }else if(millis()-current_time_YELLOW>10000 && millis()-current_time_YELLOW<=15000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(1000);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(1000);
+    }else{
+     verificare=false;
+     digitalWrite(LED_Pin_Yellow,LOW);
+     digitalWrite(LED_Pin_Blue,LOW);
+
+     digitalWrite(DIGIT1,LOW); //DIGIT1
+     digitalWrite(DIGIT2,HIGH); //DIGIT2
+     digitalWrite(A,LOW); //a
+     digitalWrite(B,LOW); //b
+     digitalWrite(C,LOW); //c
+     digitalWrite(D,LOW); //d
+     digitalWrite(E,LOW); //e
+     digitalWrite(F,LOW); //f
+     digitalWrite(G,LOW); // g
+     digitalWrite(DP,LOW); // DP
+
+     digitalWrite(DIGIT1,HIGH); //DIGIT1
+     digitalWrite(DIGIT2,LOW); //DIGIT2
+     digitalWrite(A,LOW); //a
+     digitalWrite(B,LOW); //b
+     digitalWrite(C,LOW); //c
+     digitalWrite(D,LOW); //d
+     digitalWrite(E,LOW); //e
+     digitalWrite(F,LOW); //f
+     digitalWrite(G,LOW); // g
+     yellow=false;
+    }
+  }
+}else if(red==true && yellow==false && green==false && current_time_RED!=current_time_GREEN && current_time_RED!=current_time_YELLOW){
+  verificare=true;
+  digitalWrite(LED_Pin_Red,HIGH);
+  digitalWrite(LED_Pin_Green,LOW);
+  digitalWrite(LED_Pin_Yellow,LOW);
+
+  digitalWrite(DIGIT1,LOW); //DIGIT1
+  digitalWrite(DIGIT2,HIGH); //DIGIT2
+  digitalWrite(A,HIGH); //a
+  digitalWrite(B,LOW); //b
+  digitalWrite(C,HIGH); //c
+  digitalWrite(D,HIGH); //d
+  digitalWrite(E,LOW); //e
+  digitalWrite(F,HIGH); //f
+  digitalWrite(G,HIGH); // g
+  digitalWrite(DP,LOW); // DP
+  delay(1000);
+
+  digitalWrite(DIGIT1,HIGH); //DIGIT1
+  digitalWrite(DIGIT2,LOW); //DIGIT2
+  digitalWrite(A,HIGH); //a
+  digitalWrite(B,HIGH); //b
+  digitalWrite(C,LOW); //c
+  digitalWrite(D,LOW); //d
+  digitalWrite(E,HIGH); //e
+  digitalWrite(F,HIGH); //f
+  digitalWrite(G,HIGH); // g 
+
+
+  while(verificare){
+    if(millis()-current_time_RED<=5000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(1000);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(1000);
+    }else if(millis()-current_time_RED>5000 && millis()-current_time_RED<=10000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(500);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(500);
+    }else if(millis()-current_time_RED>10000 && millis()-current_time_RED<=15000){
+      digitalWrite(LED_Pin_Blue,HIGH);
+      delay(333);
+      digitalWrite(LED_Pin_Blue,LOW);
+      delay(333);
+    }else{
+     verificare=false;
+     digitalWrite(LED_Pin_Red,LOW);
+     digitalWrite(LED_Pin_Blue,LOW);
+
+     digitalWrite(DIGIT1,LOW); //DIGIT1
+     digitalWrite(DIGIT2,HIGH); //DIGIT2
+     digitalWrite(A,LOW); //a
+     digitalWrite(B,LOW); //b
+     digitalWrite(C,LOW); //c
+     digitalWrite(D,LOW); //d
+     digitalWrite(E,LOW); //e
+     digitalWrite(F,LOW); //f
+     digitalWrite(G,LOW); // g
+     digitalWrite(DP,LOW); // DP
+
+     digitalWrite(DIGIT1,HIGH); //DIGIT1
+     digitalWrite(DIGIT2,LOW); //DIGIT2
+     digitalWrite(A,LOW); //a
+      digitalWrite(B,LOW); //b
+      digitalWrite(C,LOW); //c
+      digitalWrite(D,LOW); //d
+      digitalWrite(E,LOW); //e
+      digitalWrite(F,LOW); //f
+      digitalWrite(G,LOW); // g
+      red=false;
+    }
+  }
+}
+  
+}
