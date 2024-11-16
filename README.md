@@ -1,0 +1,1 @@
+This project centers on using the Arduino (IDE) and ESP32 microcontroller with Bluetooth technology for wireless communication. It involves programming via the Arduino (IDE), using the ESP32 as the main controller, and prototyping with a breadboard. The focus is on seamless hardware interaction, user control, and applications in IoT, automation, and remote control systems.
